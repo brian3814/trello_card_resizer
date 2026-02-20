@@ -18,5 +18,11 @@
   "action": {
     "default_popup": "popup.html",
     "default_icon": { "128": "icons/trello.png" }
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/left-right.png"],
+      "matches": ["https://trello.com/*"]
+    }
+  ]
 }

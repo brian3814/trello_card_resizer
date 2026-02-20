@@ -75,6 +75,7 @@
 
   // --- Message listener for popup communication ---
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (sender.id !== chrome.runtime.id) return;
     if (msg.type === "get-state") {
       sendResponse({
         width: cardWidth,
@@ -90,17 +91,17 @@
   // --- React to storage changes from popup ---
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== "local") return;
-    if (changes[STORAGE_KEY_WIDTH]) {
+    if (changes[STORAGE_KEY_WIDTH] && typeof changes[STORAGE_KEY_WIDTH].newValue === "number") {
       updateCardWidth(changes[STORAGE_KEY_WIDTH].newValue);
     }
-    if (changes[STORAGE_KEY_SPLIT]) {
+    if (changes[STORAGE_KEY_SPLIT] && typeof changes[STORAGE_KEY_SPLIT].newValue === "number") {
       updateSplitRatio(changes[STORAGE_KEY_SPLIT].newValue);
     }
-    if (changes[STORAGE_KEY_SHOW_SPLIT] != null) {
+    if (changes[STORAGE_KEY_SHOW_SPLIT] != null && typeof changes[STORAGE_KEY_SHOW_SPLIT].newValue === "boolean") {
       showSplitBar = changes[STORAGE_KEY_SHOW_SPLIT].newValue;
       updateSplitBarVisibility();
     }
-    if (changes[STORAGE_KEY_ENABLED] != null) {
+    if (changes[STORAGE_KEY_ENABLED] != null && typeof changes[STORAGE_KEY_ENABLED].newValue === "boolean") {
       enabled = changes[STORAGE_KEY_ENABLED].newValue;
       applyEnabledState();
     }
@@ -108,13 +109,13 @@
 
   // --- Load saved preferences ---
   chrome.storage.local.get([STORAGE_KEY_WIDTH, STORAGE_KEY_SPLIT, STORAGE_KEY_SHOW_SPLIT, STORAGE_KEY_ENABLED], (result) => {
-    if (result[STORAGE_KEY_WIDTH] != null) {
+    if (typeof result[STORAGE_KEY_WIDTH] === "number") {
       cardWidth = result[STORAGE_KEY_WIDTH];
       hasSavedWidth = true;
     }
-    if (result[STORAGE_KEY_SPLIT]) splitRatio = result[STORAGE_KEY_SPLIT];
-    if (result[STORAGE_KEY_SHOW_SPLIT] != null) showSplitBar = result[STORAGE_KEY_SHOW_SPLIT];
-    if (result[STORAGE_KEY_ENABLED] != null) enabled = result[STORAGE_KEY_ENABLED];
+    if (typeof result[STORAGE_KEY_SPLIT] === "number") splitRatio = result[STORAGE_KEY_SPLIT];
+    if (typeof result[STORAGE_KEY_SHOW_SPLIT] === "boolean") showSplitBar = result[STORAGE_KEY_SHOW_SPLIT];
+    if (typeof result[STORAGE_KEY_ENABLED] === "boolean") enabled = result[STORAGE_KEY_ENABLED];
     applyEnabledState();
   });
 
@@ -263,11 +264,12 @@
     // Visual drag indicator
     const indicator = document.createElement("div");
     indicator.className = "trello-resizer-drag-indicator";
-    indicator.innerHTML =
-      '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-      '<path d="M5 3L2 7L5 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
-      '<path d="M9 3L12 7L9 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
-      "</svg>";
+    const img = document.createElement("img");
+    img.src = chrome.runtime.getURL("icons/left-right.png");
+    img.width = 14;
+    img.height = 14;
+    img.draggable = false;
+    indicator.appendChild(img);
     dragBar.appendChild(indicator);
 
     // Insert drag bar between main and aside (replace the 8px spacer if present)
