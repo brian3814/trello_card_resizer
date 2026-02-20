@@ -1,5 +1,7 @@
+/* All overrides gated behind .trello-resizer-active on <html> */
+
 /* Make the card modal resizable via width variable */
-[data-testid="card-back-name"] {
+html.trello-resizer-active [data-testid="card-back-name"] {
   max-width: none !important;
   width: var(--trello-card-width) !important;
   transition: width 0.15s ease;
@@ -7,13 +9,13 @@
 
 /* Split pane: control main/aside flex ratio.
    Trello sets explicit width/flex-basis on these; override with !important. */
-[data-testid="card-back-name"] main {
+html.trello-resizer-active [data-testid="card-back-name"] main {
   flex: var(--left-pane-flex, 1) 1 0% !important;
   width: auto !important;
   min-width: 200px;
   overflow-y: auto;
 }
-[data-testid="card-back-name"] aside {
+html.trello-resizer-active [data-testid="card-back-name"] aside {
   flex: var(--right-pane-flex, 1) 1 0% !important;
   width: auto !important;
   min-width: 200px;

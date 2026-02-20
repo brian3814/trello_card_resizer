@@ -7,12 +7,13 @@
   const splitLabel = document.getElementById("split-label");
   const splitGroup = document.getElementById("split-group");
   const splitToggle = document.getElementById("split-toggle");
+  const enabledToggle = document.getElementById("enabled-toggle");
+  const settings = document.getElementById("settings");
   const controls = document.getElementById("controls");
   const message = document.getElementById("message");
 
-  let viewportWidth = 1920;
+  let viewportWidth = screen.width;
   let splitThreshold = 900;
-  let tabId = null;
 
   function widthToPercent(w) {
     return Math.round((w / viewportWidth) * 100);
@@ -31,49 +32,72 @@
     }
   }
 
-  function showMessage() {
-    controls.style.display = "none";
-    message.style.display = "block";
+  function updateSettingsEnabled(on) {
+    if (on) {
+      settings.classList.remove("disabled");
+    } else {
+      settings.classList.add("disabled");
+    }
   }
 
-  function showControls() {
-    controls.style.display = "block";
-    message.style.display = "none";
+  function applyToggles(state) {
+    enabledToggle.checked = state.enabled !== false;
+    updateSettingsEnabled(enabledToggle.checked);
+    splitToggle.checked = state.showSplitBar !== false;
+  }
+
+  function applyWidthState(state) {
+    if (state.viewportWidth) viewportWidth = state.viewportWidth;
+    if (state.splitThreshold) splitThreshold = state.splitThreshold;
+
+    // Width slider
+    widthSlider.min = "30";
+    widthSlider.max = "95";
+    const width = state.width || Math.round(viewportWidth * 0.56);
+    const pct = widthToPercent(width);
+    widthSlider.value = String(Math.max(30, Math.min(95, pct)));
+    widthLabel.textContent = "Card Width: " + pct + "%";
+
+    // Split slider
+    const splitPct = Math.round((state.splitRatio || 0.5) * 100);
+    splitSlider.value = String(splitPct);
+    splitLabel.textContent = "Column Split: " + splitPct + "% / " + (100 - splitPct) + "%";
+    updateSplitEnabled(width);
   }
 
   function init() {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (!tabs[0]) { showMessage(); return; }
-      tabId = tabs[0].id;
+    // Always show controls, loading from storage (source of truth for toggles)
+    controls.style.display = "block";
 
-      chrome.tabs.sendMessage(tabId, { type: "get-state" }, (response) => {
-        if (chrome.runtime.lastError || !response) {
-          showMessage();
-          return;
-        }
+    chrome.storage.local.get(
+      ["trello_card_width", "trello_split_ratio", "trello_show_split_bar", "trello_resizer_enabled"],
+      (result) => {
+        applyToggles({
+          enabled: result.trello_resizer_enabled,
+          showSplitBar: result.trello_show_split_bar,
+        });
+        applyWidthState({
+          width: result.trello_card_width,
+          splitRatio: result.trello_split_ratio,
+        });
 
-        showControls();
-        viewportWidth = response.viewportWidth || 1920;
-        splitThreshold = response.splitThreshold || 900;
-
-        // Width slider (30–90% of viewport)
-        widthSlider.min = "30";
-        widthSlider.max = "95";
-        const pct = widthToPercent(response.width);
-        widthSlider.value = String(Math.max(30, Math.min(95, pct)));
-        widthLabel.textContent = "Card Width: " + pct + "%";
-
-        // Split toggle
-        splitToggle.checked = response.showSplitBar !== false;
-
-        // Split slider
-        const splitPct = Math.round(response.splitRatio * 100);
-        splitSlider.value = String(splitPct);
-        splitLabel.textContent = "Column Split: " + splitPct + "% / " + (100 - splitPct) + "%";
-        updateSplitEnabled(response.width);
-      });
-    });
+        // Refine width display with live viewport from content script
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          if (!tabs[0]) return;
+          chrome.tabs.sendMessage(tabs[0].id, { type: "get-state" }, (response) => {
+            if (chrome.runtime.lastError || !response) return;
+            applyWidthState(response);
+          });
+        });
+      }
+    );
   }
+
+  // Enabled toggle — enable/disable extension effects
+  enabledToggle.addEventListener("change", () => {
+    updateSettingsEnabled(enabledToggle.checked);
+    chrome.storage.local.set({ trello_resizer_enabled: enabledToggle.checked });
+  });
 
   // Width slider — write to storage, content script reacts via onChanged
   widthSlider.addEventListener("input", () => {

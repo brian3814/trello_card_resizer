@@ -82,22 +82,19 @@
       user-select: none;
       cursor: pointer;
     }
-    #message {
-      font-size: 13px;
-      color: #5e6c84;
-      text-align: center;
-      padding: 8px 0;
-      display: none;
-    }
     #controls { display: block; }
   </style>
 </head>
 <body>
   <h1>Trello Card Resizer</h1>
-  <div id="message">Open a Trello card to adjust settings.</div>
   <div id="controls">
+    <div class="checkbox-group">
+      <input type="checkbox" id="enabled-toggle" checked>
+      <label for="enabled-toggle">Enable extension</label>
+    </div>
+    <div id="settings">
     <div class="slider-group" id="width-group">
-      <label class="slider-label" id="width-label">Card Width: 100%</label>
+      <label class="slider-label" id="width-label">Card Width: 56%</label>
       <input type="range" id="width-slider" min="30" max="95" value="56">
     </div>
     <div class="slider-group" id="split-group">
@@ -107,6 +104,7 @@
     <div class="checkbox-group">
       <input type="checkbox" id="split-toggle" checked>
       <label for="split-toggle">Show column drag handle</label>
+    </div>
     </div>
   </div>
   <script src="popup.js"></script>

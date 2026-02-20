@@ -3,6 +3,7 @@
   const STORAGE_KEY_WIDTH = "trello_card_width";
   const STORAGE_KEY_SPLIT = "trello_split_ratio";
   const STORAGE_KEY_SHOW_SPLIT = "trello_show_split_bar";
+  const STORAGE_KEY_ENABLED = "trello_resizer_enabled";
   const SPLIT_THRESHOLD = 900;
   const CARD_SELECTOR = '[data-testid="card-back-name"]';
 
@@ -11,6 +12,7 @@
   let cardWidth = 768;
   let splitRatio = 0.5;
   let showSplitBar = true;
+  let enabled = true;
   let cardElement = null;
 
   function getMinCardWidth() {
@@ -78,6 +80,7 @@
         width: cardWidth,
         splitRatio: splitRatio,
         showSplitBar: showSplitBar,
+        enabled: enabled,
         viewportWidth: window.innerWidth,
         splitThreshold: SPLIT_THRESHOLD,
       });
@@ -97,18 +100,22 @@
       showSplitBar = changes[STORAGE_KEY_SHOW_SPLIT].newValue;
       updateSplitBarVisibility();
     }
+    if (changes[STORAGE_KEY_ENABLED] != null) {
+      enabled = changes[STORAGE_KEY_ENABLED].newValue;
+      applyEnabledState();
+    }
   });
 
   // --- Load saved preferences ---
-  chrome.storage.local.get([STORAGE_KEY_WIDTH, STORAGE_KEY_SPLIT, STORAGE_KEY_SHOW_SPLIT], (result) => {
+  chrome.storage.local.get([STORAGE_KEY_WIDTH, STORAGE_KEY_SPLIT, STORAGE_KEY_SHOW_SPLIT, STORAGE_KEY_ENABLED], (result) => {
     if (result[STORAGE_KEY_WIDTH] != null) {
       cardWidth = result[STORAGE_KEY_WIDTH];
       hasSavedWidth = true;
     }
     if (result[STORAGE_KEY_SPLIT]) splitRatio = result[STORAGE_KEY_SPLIT];
     if (result[STORAGE_KEY_SHOW_SPLIT] != null) showSplitBar = result[STORAGE_KEY_SHOW_SPLIT];
-    updateCardWidth(cardWidth);
-    updateSplitRatio(splitRatio);
+    if (result[STORAGE_KEY_ENABLED] != null) enabled = result[STORAGE_KEY_ENABLED];
+    applyEnabledState();
   });
 
   // --- Observe DOM for card modal opening ---
@@ -132,7 +139,7 @@
         cardWidth = detectedDefaultWidth;
       }
     }
-    updateCardWidth(cardWidth);
+    applyEnabledState();
 
     // ============================
     // A) Card Width Drag Handles
@@ -178,6 +185,32 @@
     // B) Split Mode
     // ============================
     setupSplitMode(card);
+  }
+
+  function applyEnabledState() {
+    if (enabled) {
+      document.documentElement.classList.add("trello-resizer-active");
+      updateCardWidth(cardWidth);
+      updateSplitRatio(splitRatio);
+    } else {
+      document.documentElement.classList.remove("trello-resizer-active");
+      // Clear inline widths so Trello reverts to its defaults
+      if (cardElement) {
+        cardElement.style.removeProperty("width");
+        if (cardElement.parentElement) {
+          cardElement.parentElement.style.removeProperty("width");
+          if (cardElement.parentElement.parentElement) {
+            cardElement.parentElement.parentElement.style.removeProperty("width");
+          }
+        }
+      }
+    }
+    // Hide/show all extension UI elements
+    document.querySelectorAll(
+      ".trello-card-width-handle, .trello-resizer-drag-bar"
+    ).forEach((el) => {
+      el.style.display = enabled ? "" : "none";
+    });
   }
 
   function updateSplitBarVisibility() {
