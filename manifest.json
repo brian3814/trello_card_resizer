@@ -14,5 +14,9 @@
   ],
   "icons": {
     "128": "icons/trello.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": { "128": "icons/trello.png" }
   }
 }

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 260px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #fff;
+      padding: 16px;
+    }
+    h1 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #172b4d;
+      margin-bottom: 14px;
+    }
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .slider-group:last-child { margin-bottom: 0; }
+    .slider-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #172b4d;
+      user-select: none;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #dfe1e6;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #0079bf;
+      cursor: pointer;
+      border: 2px solid #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #0079bf;
+      cursor: pointer;
+      border: 2px solid #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    .disabled .slider-label { color: #97a0af; }
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .checkbox-group input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
+      accent-color: #0079bf;
+      cursor: pointer;
+    }
+    .checkbox-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #172b4d;
+      user-select: none;
+      cursor: pointer;
+    }
+    #message {
+      font-size: 13px;
+      color: #5e6c84;
+      text-align: center;
+      padding: 8px 0;
+      display: none;
+    }
+    #controls { display: block; }
+  </style>
+</head>
+<body>
+  <h1>Trello Card Resizer</h1>
+  <div id="message">Open a Trello card to adjust settings.</div>
+  <div id="controls">
+    <div class="slider-group" id="width-group">
+      <label class="slider-label" id="width-label">Card Width: 100%</label>
+      <input type="range" id="width-slider" min="30" max="95" value="56">
+    </div>
+    <div class="slider-group" id="split-group">
+      <label class="slider-label" id="split-label">Column Split: 50% / 50%</label>
+      <input type="range" id="split-slider" min="30" max="70" value="50">
+    </div>
+    <div class="checkbox-group">
+      <input type="checkbox" id="split-toggle" checked>
+      <label for="split-toggle">Show column drag handle</label>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
