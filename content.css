@@ -1,0 +1,55 @@
+/* Make the card modal resizable via width variable */
+.window-overlay .window {
+  max-width: none !important;
+  width: var(--trello-card-width, 768px) !important;
+  transition: width 0.15s ease;
+}
+/* When in split mode, convert main content to side-by-side layout */
+.window-overlay .window.split-mode .window-main-col {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+}
+/* Left pane: description + attachments area */
+.window-overlay .window.split-mode .card-detail-data {
+  flex: var(--left-pane-flex, 1) !important;
+  min-width: 200px;
+  overflow-y: auto;
+}
+/* Right pane: activity/comments area */
+.window-overlay .window.split-mode .window-module.mod-activity {
+  flex: var(--right-pane-flex, 1) !important;
+  min-width: 200px;
+  overflow-y: auto;
+  border-left: 1px solid #ddd;
+  padding-left: 12px;
+}
+/* The drag handle between panes */
+.trello-resizer-drag-bar {
+  width: 6px;
+  cursor: col-resize;
+  background: transparent;
+  position: relative;
+  flex-shrink: 0;
+  z-index: 10;
+  align-self: stretch;
+}
+.trello-resizer-drag-bar:hover,
+.trello-resizer-drag-bar.dragging {
+  background: rgba(0, 121, 191, 0.3);
+  border-radius: 3px;
+}
+/* Width drag handle at the right edge of card modal */
+.trello-card-width-handle {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  width: 8px;
+  height: 100%;
+  cursor: ew-resize;
+  z-index: 1000;
+}
+.trello-card-width-handle:hover,
+.trello-card-width-handle.dragging {
+  background: rgba(0, 121, 191, 0.25);
+}

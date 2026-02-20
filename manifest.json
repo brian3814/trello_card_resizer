@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Trello Card Resizer",
+  "version": "1.0",
+  "description": "Resize Trello card width and adjust content/comments column widths.",
+  "permissions": ["storage"],
+  "content_scripts": [
+    {
+      "matches": ["https://trello.com/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "128": "icons/trello.png"
+  }
+}
